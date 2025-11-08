@@ -2,12 +2,23 @@ import Link from "next/link";
 import { LoginForm } from "@/components/login-form";
 import { SignUpForm } from "@/components/sign-up-form";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
+  // 已登录则直接进入大厅，避免留在登录页
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    redirect("/lobby");
+  }
+
   const params = await searchParams;
   const active = params?.tab === "signup" ? "signup" : "login";
 

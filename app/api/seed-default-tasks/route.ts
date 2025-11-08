@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { ensureProfile } from "@/lib/profile";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -19,6 +20,14 @@ export async function POST(_req: NextRequest) {
       return NextResponse.json({ error: "未登录或会话失效" }, { status: 401 });
     }
     const userId = userData.user.id;
+
+    // 确保存在昵称档案（首次登陆自动生成）
+    try {
+      await ensureProfile();
+    } catch (e) {
+      // 忽略档案初始化失败，不影响题库导入
+      console.warn("ensureProfile failed:", e);
+    }
 
     // 读取题库模板
     const filePath = path.join(process.cwd(), "lib", "tasks.json");

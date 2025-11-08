@@ -42,6 +42,16 @@ export function SignUpForm({
         password,
       });
       if (error) throw error;
+      // 等待会话建立（SSR Cookie 同步可能存在短暂延迟）
+      try {
+        let attempts = 0;
+        while (attempts < 5) {
+          const { data } = await supabase.auth.getUser();
+          if (data?.user) break;
+          await new Promise((r) => setTimeout(r, 250));
+          attempts++;
+        }
+      } catch {}
       // 保存注册时的账号与密码到 localStorage（仅客户端）
       try {
         localStorage.setItem(
@@ -55,13 +65,12 @@ export function SignUpForm({
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json?.error || "初始化默认题库失败");
-      } catch (seedErr: any) {
-        // 若初始化失败，直接显示错误，不做兜底
-        throw seedErr instanceof Error ? seedErr : new Error("初始化默认题库失败");
-      }
-      router.push("/lobby");
+        if (!res.ok) {
+          // 不阻塞跳转，兜底由大厅页完成
+          console.warn("seed-default-tasks failed", await res.text());
+        }
+      } catch {}
+      router.replace("/lobby");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
