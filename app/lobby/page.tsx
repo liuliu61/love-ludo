@@ -2,8 +2,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { listAvailableThemes, createRoom, joinRoom } from "./actions";
-import { Users, LogIn, Layers, ChevronDown, Hash } from "lucide-react";
+import { Users, LogIn, Layers, ChevronDown, Hash, Github } from "lucide-react";
 import PreferencesModal from "@/components/profile/preferences-modal";
+import Link from "next/link";
 
 export default async function LobbyPage({ searchParams }: { searchParams?: { error?: string } }) {
   const { data: themes } = await listAvailableThemes();
@@ -18,10 +19,20 @@ export default async function LobbyPage({ searchParams }: { searchParams?: { err
           将网站添加到主屏幕可以获得近似app的体验哦~
         </p>
         <div className="flex items-center justify-between mb-6 pt-4">
+          <Link
+            href="https://github.com/woniu9524/love-ludo"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center hover:opacity-90 transition-all"
+            aria-label="GitHub 仓库"
+          >
+            <Github className="w-5 h-5 text-white" />
+          </Link>
           <div>
             <h2 className="text-2xl font-bold">首页</h2>
             <p className="text-sm text-gray-400 mt-1">找到你的对手，开始游戏</p>
           </div>
+          <div className="w-10" />
         </div>
 
         <div className="space-y-6">
