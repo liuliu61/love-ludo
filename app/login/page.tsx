@@ -4,6 +4,13 @@ import { SignUpForm } from "@/components/sign-up-form";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+// 引入卡密验证组件（客户端组件标记）
+import dynamic from "next/dynamic";
+
+// 动态导入卡密验证组件（避免服务端渲染报错）
+const CardVerify = dynamic(() => import("@/components/card-verify"), {
+  ssr: false,
+});
 
 export default async function Page({
   searchParams,
@@ -20,7 +27,8 @@ export default async function Page({
   }
 
   const params = await searchParams;
-  const active = params?.tab === "signup" ? "signup" : "login";
+  // 新增 card 标签页，用于卡密验证
+  const active = params?.tab === "signup" ? "signup" : params?.tab === "card" ? "card" : "login";
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6">
@@ -30,6 +38,7 @@ export default async function Page({
           <p className="text-gray-400">让爱更有趣</p>
         </div>
 
+        {/* 新增卡密验证标签页 */}
         <div className="glass rounded-2xl p-1 flex mb-8">
           <Button
             asChild
@@ -49,10 +58,22 @@ export default async function Page({
           >
             <Link href="/login?tab=signup">注册</Link>
           </Button>
+          <Button
+            asChild
+            variant="ghost"
+            className={`flex-1 rounded-xl transition-all ${
+              active === "card" ? "gradient-primary text-white hover:opacity-90" : "text-gray-400 hover:text-gray-300 hover:bg-white/5"
+            }`}
+          >
+            <Link href="/login?tab=card">卡密验证</Link>
+          </Button>
         </div>
 
         <div className="space-y-4">
-          {active === "login" ? <LoginForm /> : <SignUpForm />}
+          {/* 根据激活标签显示对应组件 */}
+          {active === "login" ? <LoginForm /> : 
+           active === "signup" ? <SignUpForm /> : 
+           <CardVerify />}
         </div>
 
         <p className="text-center text-sm text-gray-400 mt-6">
